@@ -1,25 +1,15 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/dhinesh20022806/api_s3/app/cmd"
+)
 
 
 
 func main() {
 
 
-	server := gin.Default()
-
-	server.GET("/", getObject)
-	server.PUT("/", putObject)
-
-	server.Run(":8080")
-}
-
-func getObject(context *gin.Context) {
-
+	cmd.RunServer()
 
 }
 
-func putObject(context *gin.Context) {
-
-}
