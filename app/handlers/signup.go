@@ -8,13 +8,12 @@ import (
 )
 
 type User struct {
-	Email string `binding:"required"`
+	Email    string `binding:"required"`
 	Password string `binding:"required"`
-	Name string `binding:"required"`
+	Name     string `binding:"required"`
 }
 
 func SignUp(ctx *gin.Context) {
-
 	var user User
 
 	err := ctx.ShouldBindJSON(&user)
@@ -29,12 +28,12 @@ func SignUp(ctx *gin.Context) {
 	token, err := newUser.CreateUser()
 
 	if err != nil {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
 	ctx.SetCookie("token", token, 3600, "/", "localhost", false, false)
 
 	ctx.JSON(http.StatusAccepted, gin.H{"message": "Your account created successfully!"})
-	
+
 }

@@ -8,18 +8,18 @@ import (
 )
 
 type IamUser struct {
-	email string
+	email    string
 	password string
-	name string
-	jwt string
-	valid bool
+	name     string
+	jwt      string
+	valid    bool
 }
 
-var conn *grpc.ClientConn;
+var conn *grpc.ClientConn
 var client genpb.AuthServiceClient
 
-func init(){
-	var err error;
+func init() {
+	var err error
 
 	conn, err = grpc.NewClient("localhost:50050")
 
@@ -32,23 +32,23 @@ func init(){
 
 func NewUser(name, email, password, jwt string) *IamUser {
 	return &IamUser{
-		email: email,
+		email:    email,
 		password: password,
-		name: name,
-		jwt: jwt,
+		name:     name,
+		jwt:      jwt,
 	}
 }
 
 func (i *IamUser) CreateUser() (string, error) {
 	ctx := context.Background()
 	res, err := client.CreateUser(ctx, &genpb.CreateUserRequest{
-		Email: i.email,
-		Name: i.name,
+		Email:    i.email,
+		Name:     i.name,
 		Password: i.password,
 	})
 
 	if err != nil {
-           return "", err
+		return "", err
 	}
 	return res.Jwt, nil
 }
@@ -57,7 +57,7 @@ func (i *IamUser) Login() (string, error) {
 	ctx := context.Background()
 
 	res, err := client.IsValidUser(ctx, &genpb.IsValidUserRequest{
-		Email: i.email,
+		Email:    i.email,
 		Password: i.password,
 	})
 
@@ -81,4 +81,3 @@ func (i *IamUser) IsValidJwt() (bool, error) {
 	}
 	return true, nil
 }
-

@@ -9,22 +9,20 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-
 var conn *grpc.ClientConn
 var client *genpb.AuthServiceClient
 var Client genpb.AuthServiceClient
 
 func init() {
-	addr := "localhost:50050";
+	addr := "localhost:50050"
 
 	conn, err := grpc.NewClient(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
+	)
 
 	if err != nil {
-log.Fatalf("Failed to create connection: %v", err)
+		log.Fatalf("Failed to create connection: %v", err)
 	}
-
 
 	client := genpb.NewAuthServiceClient(conn)
 
@@ -33,7 +31,6 @@ log.Fatalf("Failed to create connection: %v", err)
 }
 
 func RunServer() {
-	
 
 	server := gin.Default()
 
@@ -46,33 +43,20 @@ func RunServer() {
 
 	server.Run(":8080")
 
-	
-   
-
-	
-	
-
-
 }
 
 func login(context *gin.Context) {
-	
-	
 
 }
 
 func signup(context *gin.Context) {
 
-
 }
 
 func getObject(context *gin.Context) {
 
-
 }
 
 func putObject(context *gin.Context) {
-
-
 
 }

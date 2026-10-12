@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 func Authenticate(ctx *gin.Context) {
 
 	token := ctx.Request.Header.Get("Authorization")
@@ -18,6 +17,5 @@ func Authenticate(ctx *gin.Context) {
 
 	// verify token grpc call
 
-	
-    ctx.Next()
+	ctx.Next()
 }
