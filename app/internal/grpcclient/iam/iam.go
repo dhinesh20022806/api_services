@@ -1,10 +1,11 @@
-package grpcclient
+package iam
 
 import (
 	"context"
 
 	genpb "github.com/dhinesh20022806/grpc_service/proto/gen"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type IamUser struct {
@@ -12,7 +13,6 @@ type IamUser struct {
 	password string
 	name     string
 	jwt      string
-	valid    bool
 }
 
 var conn *grpc.ClientConn
@@ -21,13 +21,14 @@ var client genpb.AuthServiceClient
 func init() {
 	var err error
 
-	conn, err = grpc.NewClient("localhost:50050")
+	conn, err = grpc.NewClient("localhost:50050", grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 
+		panic(err)
 	}
 
-	client = genpb.NewAuthServiceClient(conn)
+	client = genpb.NewAuthServiceClient(conn,)
 }
 
 func NewUser(name, email, password, jwt string) *IamUser {

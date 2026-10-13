@@ -1,62 +1,31 @@
 package cmd
 
 import (
-	"log"
-
-	genpb "github.com/dhinesh20022806/grpc_service/proto/gen"
+	"github.com/dhinesh20022806/api_s3/app/handlers"
+	"github.com/dhinesh20022806/api_s3/app/middlewares"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
-var conn *grpc.ClientConn
-var client *genpb.AuthServiceClient
-var Client genpb.AuthServiceClient
 
-func init() {
-	addr := "localhost:50050"
-
-	conn, err := grpc.NewClient(addr,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-
-	if err != nil {
-		log.Fatalf("Failed to create connection: %v", err)
-	}
-
-	client := genpb.NewAuthServiceClient(conn)
-
-	Client = client
-
-}
 
 func RunServer() {
 
 	server := gin.Default()
 
-	server.POST("/login", login)
+	server.POST("/login", handlers.Login)
+	server.POST("/signup", handlers.SignUp)
 
-	server.POST("/signup", signup)
+	auth := server.Group("")
 
-	server.GET("/", getObject)
-	server.PUT("/", putObject)
+	auth.Use(middlewares.Authenticate)
+
+	{
+		auth.PUT("/", )
+		auth.GET("/", )
+
+	}
+
 
 	server.Run(":8080")
-
-}
-
-func login(context *gin.Context) {
-
-}
-
-func signup(context *gin.Context) {
-
-}
-
-func getObject(context *gin.Context) {
-
-}
-
-func putObject(context *gin.Context) {
 
 }

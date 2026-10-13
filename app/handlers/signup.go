@@ -27,6 +27,7 @@ func SignUp(ctx *gin.Context) {
 
 	token, err := newUser.CreateUser()
 
+	
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
