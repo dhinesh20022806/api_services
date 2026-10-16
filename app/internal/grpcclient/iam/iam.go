@@ -28,7 +28,7 @@ func init() {
 		panic(err)
 	}
 
-	client = genpb.NewAuthServiceClient(conn,)
+	client = genpb.NewAuthServiceClient(conn)
 }
 
 func NewUser(name, email, password, jwt string) *IamUser {

@@ -17,10 +17,12 @@ func RunServer() {
 
 	auth := server.Group("")
 
+	server.MaxMultipartMemory = 4 << 30
+
 	auth.Use(middlewares.Authenticate)
 
 	{
-		auth.PUT("/", )
+		auth.PUT("/", handlers.PUTObject)
 		auth.GET("/", )
 
 	}
