@@ -70,15 +70,16 @@ func (i *IamUser) Login() (string, error) {
 
 }
 
-func (i *IamUser) IsValidJwt() (bool, error) {
+func (i *IamUser) IsValidJwt() (string, error) {
 	ctx := context.Background()
-	_, err := client.IsValidJWT(ctx, &genpb.IsValidJWTRequest{
+	user, err := client.IsValidJWT(ctx, &genpb.IsValidJWTRequest{
 		Jwt: i.jwt,
 	})
 
 	if err != nil {
 
-		return false, err
+		return "", err
 	}
-	return true, nil
+
+	return user.Email, nil
 }

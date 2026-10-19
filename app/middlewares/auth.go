@@ -17,15 +17,13 @@ func Authenticate(ctx *gin.Context) {
 		return
 	}
 
-	// verify token grpc call
-
 	tokens := strings.Split(token, " ")
 
 	user := iam.NewUser("", "", "", tokens[1])
 
-	isvalid, err := user.IsValidJwt()
+	email, err := user.IsValidJwt()
 
-	if err != nil || !isvalid {
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "token invalid or expired",
 		})
@@ -33,5 +31,6 @@ func Authenticate(ctx *gin.Context) {
 		return
 	}
 
+	ctx.Set("user", email)
 	ctx.Next()
 }
