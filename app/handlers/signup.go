@@ -1,3 +1,4 @@
+// Package handlers Signup end of the request
 package handlers
 
 import (
@@ -7,12 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// User JSON structure in for request
 type User struct {
 	Email    string `binding:"required"`
 	Password string `binding:"required"`
 	Name     string `binding:"required"`
 }
 
+// SignUp is controller to call external services
 func SignUp(ctx *gin.Context) {
 	var user User
 
@@ -27,7 +30,6 @@ func SignUp(ctx *gin.Context) {
 
 	token, err := newUser.CreateUser()
 
-	
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return

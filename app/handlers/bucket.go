@@ -1,3 +1,4 @@
+// Package handlers response bucket curd operations
 package handlers
 
 import (
@@ -9,18 +10,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Bucket struct {
-	Id   string
-	name string
-}
-
+// POSTBucket used to create new Bucket
 func POSTBucket(ctx *gin.Context) {
 
 	var name string
 
-	ctx.ShouldBindBodyWithJSON(name)
+	err := ctx.ShouldBindBodyWithJSON(name)
 
-	if len(strings.Trim(name, " ")) > 0 {
+	if err != nil || len(strings.Trim(name, " ")) > 0 {
 
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "Bad Request",
@@ -39,7 +36,7 @@ func POSTBucket(ctx *gin.Context) {
 		return
 	}
 
-	user, valid := val.(*iam.IamUser)
+	user, valid := val.(*iam.User)
 
 	if !valid {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -48,7 +45,7 @@ func POSTBucket(ctx *gin.Context) {
 		return
 	}
 
-	bucket, err := dbx.CreateBucket(name, user.Id)
+	bucket, err := dbx.CreateBucket(name, user.ID)
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -60,7 +57,7 @@ func POSTBucket(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "successfully Bucket Created!",
 		"data": gin.H{
-			"bucketId":   bucket.Id,
+			"bucketId":   bucket.ID,
 			"bucketName": bucket.BucketName,
 		},
 	})

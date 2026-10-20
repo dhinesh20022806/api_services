@@ -1,3 +1,4 @@
+// Package iam handling external service for Identity and Access Management
 package iam
 
 import (
@@ -8,12 +9,13 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type IamUser struct {
+// User is Identity and Access Management structure
+type User struct {
 	Email    string
 	password string
 	Name     string
 	jwt      string
-	Id       string
+	ID       string
 }
 
 var conn *grpc.ClientConn
@@ -32,8 +34,9 @@ func init() {
 	client = genpb.NewAuthServiceClient(conn)
 }
 
-func NewUser(name, email, password, jwt string) *IamUser {
-	return &IamUser{
+// NewUser is constructor of IamUser type
+func NewUser(name, email, password, jwt string) *User {
+	return &User{
 		Email:    email,
 		password: password,
 		Name:     name,
@@ -41,7 +44,8 @@ func NewUser(name, email, password, jwt string) *IamUser {
 	}
 }
 
-func (i *IamUser) CreateUser() (string, error) {
+// CreateUser used for singup it's from external services
+func (i *User) CreateUser() (string, error) {
 	ctx := context.Background()
 	res, err := client.CreateUser(ctx, &genpb.CreateUserRequest{
 		Email:    i.Email,
@@ -55,7 +59,8 @@ func (i *IamUser) CreateUser() (string, error) {
 	return res.Jwt, nil
 }
 
-func (i *IamUser) Login() (string, error) {
+// Login is method execute on external services
+func (i *User) Login() (string, error) {
 	ctx := context.Background()
 
 	res, err := client.IsValidUser(ctx, &genpb.IsValidUserRequest{
@@ -71,7 +76,8 @@ func (i *IamUser) Login() (string, error) {
 
 }
 
-func (i *IamUser) IsValidJwt() (IamUser, error) {
+// IsValidJwt valid jwt token from external services
+func (i *User) IsValidJwt() (User, error) {
 	ctx := context.Background()
 	user, err := client.IsValidJWT(ctx, &genpb.IsValidJWTRequest{
 		Jwt: i.jwt,
@@ -79,12 +85,12 @@ func (i *IamUser) IsValidJwt() (IamUser, error) {
 
 	if err != nil {
 
-		return IamUser{}, err
+		return User{}, err
 	}
 
-	return IamUser{
+	return User{
 		Email: user.Email,
-		Id:    user.Id,
+		ID:    user.Id,
 		Name:  user.Name,
 	}, nil
 }

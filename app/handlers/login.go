@@ -1,3 +1,4 @@
+// Package handlers login request response
 package handlers
 
 import (
@@ -5,11 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// LoginUser structure expected from request
 type LoginUser struct {
 	Email    string `binding:"required"`
 	Password string `binding:"required"`
 }
 
+// Login controller create jwt token and stored to cookies
 func Login(context *gin.Context) {
 
 	var user LoginUser

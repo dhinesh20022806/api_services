@@ -1,16 +1,19 @@
+// Package dbx is database connections and queries
 package dbx
 
 import (
 	"database/sql"
 	"errors"
+	"log"
 )
 
 var db *sql.DB
 
+// Bucket is used to store collections of objects
 type Bucket struct {
-	Id         string
+	ID         string
 	BucketName string
-	OwnerId    string
+	OwnerID    string
 }
 
 func init() {
@@ -21,19 +24,22 @@ func init() {
 
 	if err != nil {
 
+		log.Printf("error to connect database %v", err)
 	}
 
 	if err = db.Ping(); err != nil {
 
+		log.Printf("error to ping the database %v", err)
 	}
 }
 
-func InsertMetaData(id, filename, bucketId, types string) error {
+// InsertMetaData store the meta of object in database
+func InsertMetaData(id, filename, bucketID, types string) error {
 
 	query := `INSERT INTO object (id, filename, bucketId, types) VALUES
 	 ($1, $2, $3)`
 
-	_, err := db.Exec(query, id, filename, bucketId, types)
+	_, err := db.Exec(query, id, filename, bucketID, types)
 
 	if err != nil {
 		return err
@@ -42,12 +48,13 @@ func InsertMetaData(id, filename, bucketId, types string) error {
 	return nil
 }
 
-func IsMyBucketId(bucketId, owner_id string) (bool, error) {
+// IsMyBucketID check wheather bucketID owned or not
+func IsMyBucketID(bucketID, ownerID string) (bool, error) {
 
 	var bucketName string
 	query := `SELECT bucketName FROM bucket WHERE bucketId = $1 AND owner_id = $2`
 
-	err := db.QueryRow(query, bucketId, owner_id).Scan(
+	err := db.QueryRow(query, bucketID, ownerID).Scan(
 		&bucketName,
 	)
 	if err != nil {
@@ -59,7 +66,26 @@ func IsMyBucketId(bucketId, owner_id string) (bool, error) {
 	return true, nil
 }
 
-func CreateBucket(bucketName, owner_id string) (*Bucket, error) {
+// GetMyObject allow authorised people access their objects
+func GetMyObject(objectID string, ownerID string) (string, error) {
+
+	var objectName string
+	query := `SELECT name FROM objects WHERE id = $1 AND owner_id = $2;`
+
+	err := db.QueryRow(query, objectID, ownerID).Scan(
+		&objectName,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", nil
+		}
+		return objectName, err
+	}
+	return objectName, nil
+}
+
+// CreateBucket used to create new unique bucketName there is sql constraint for creating name
+func CreateBucket(bucketName, ownerID string) (*Bucket, error) {
 
 	var object Bucket
 
@@ -67,10 +93,10 @@ func CreateBucket(bucketName, owner_id string) (*Bucket, error) {
 	VALUES($1, $2)
 	RETURNING id, bucket_name, owner_id`
 
-	err := db.QueryRow(query, bucketName, owner_id).Scan(
-		&object.Id,
-		&object.bucketName,
-		&object.OwnerId,
+	err := db.QueryRow(query, bucketName, ownerID).Scan(
+		&object.ID,
+		&object.BucketName,
+		&object.OwnerID,
 	)
 
 	if err != nil {
