@@ -6,8 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
-
 func RunServer() {
 
 	server := gin.Default()
@@ -23,10 +21,9 @@ func RunServer() {
 
 	{
 		auth.PUT("/", handlers.PUTObject)
-		auth.GET("/", )
+		auth.GET("/", handlers.GETObject)
 
 	}
-
 
 	server.Run(":8080")
 

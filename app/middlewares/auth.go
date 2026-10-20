@@ -21,7 +21,7 @@ func Authenticate(ctx *gin.Context) {
 
 	user := iam.NewUser("", "", "", tokens[1])
 
-	email, err := user.IsValidJwt()
+	validUser, err := user.IsValidJwt()
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -30,7 +30,6 @@ func Authenticate(ctx *gin.Context) {
 
 		return
 	}
-
-	ctx.Set("user", email)
+	ctx.Set("user", validUser)
 	ctx.Next()
 }

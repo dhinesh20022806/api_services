@@ -9,10 +9,11 @@ import (
 )
 
 type IamUser struct {
-	email    string
+	Email    string
 	password string
-	name     string
+	Name     string
 	jwt      string
+	Id       string
 }
 
 var conn *grpc.ClientConn
@@ -33,9 +34,9 @@ func init() {
 
 func NewUser(name, email, password, jwt string) *IamUser {
 	return &IamUser{
-		email:    email,
+		Email:    email,
 		password: password,
-		name:     name,
+		Name:     name,
 		jwt:      jwt,
 	}
 }
@@ -43,8 +44,8 @@ func NewUser(name, email, password, jwt string) *IamUser {
 func (i *IamUser) CreateUser() (string, error) {
 	ctx := context.Background()
 	res, err := client.CreateUser(ctx, &genpb.CreateUserRequest{
-		Email:    i.email,
-		Name:     i.name,
+		Email:    i.Email,
+		Name:     i.Name,
 		Password: i.password,
 	})
 
@@ -58,7 +59,7 @@ func (i *IamUser) Login() (string, error) {
 	ctx := context.Background()
 
 	res, err := client.IsValidUser(ctx, &genpb.IsValidUserRequest{
-		Email:    i.email,
+		Email:    i.Email,
 		Password: i.password,
 	})
 
@@ -70,7 +71,7 @@ func (i *IamUser) Login() (string, error) {
 
 }
 
-func (i *IamUser) IsValidJwt() (string, error) {
+func (i *IamUser) IsValidJwt() (IamUser, error) {
 	ctx := context.Background()
 	user, err := client.IsValidJWT(ctx, &genpb.IsValidJWTRequest{
 		Jwt: i.jwt,
@@ -78,8 +79,12 @@ func (i *IamUser) IsValidJwt() (string, error) {
 
 	if err != nil {
 
-		return "", err
+		return IamUser{}, err
 	}
 
-	return user.Email, nil
+	return IamUser{
+		Email: user.Email,
+		Id:    user.Id,
+		Name:  user.Name,
+	}, nil
 }
