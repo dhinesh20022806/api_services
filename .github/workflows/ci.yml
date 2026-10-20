@@ -1,0 +1,51 @@
+name: Merge code
+
+on:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  lint-test-fmt:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Format code
+        run: make fmt
+
+      - name: Run lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m
+
+      - name: Run tests
+        run: make test
+
+      - name: Configure Git Bot
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Commit and Push Changes
+        run: |
+          # Only commit if there are actually changes to prevent workflow errors
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "chore: automated code update by github-actions[bot]"
+            git push origin HEAD:${{ github.ref_name }}
+          else
+            echo "No changes detected. Skipping push."
+          fi

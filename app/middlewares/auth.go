@@ -1,3 +1,4 @@
+// Package middlewares handles checks, append additional informations
 package middlewares
 
 import (
@@ -8,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Authenticate is Middleware to check whether request is authenticate or not
+// add additional information to rest of request flow
 func Authenticate(ctx *gin.Context) {
 
 	token := ctx.Request.Header.Get("Authorization")

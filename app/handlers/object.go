@@ -1,7 +1,10 @@
+// Package handlers end of the request cycle for handling Object
 package handlers
 
 import (
+	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"uuid"
 
@@ -11,13 +14,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// PUTObject is store raw bytes to external services
 func PUTObject(cxt *gin.Context) {
 
-	var bucketId string
+	var bucketID string
 
-	cxt.ShouldBindBodyWithJSON(bucketId)
+	err := cxt.ShouldBindBodyWithJSON(bucketID)
 
-	if len(bucketId) != 0 {
+	if err != nil || len(bucketID) != 0 {
 		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "bad request",
 		})
@@ -28,16 +32,35 @@ func PUTObject(cxt *gin.Context) {
 
 	if err != nil {
 
+		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "something went wrong!",
+		})
+		return
 	}
 
 	src, err := file.Open()
 
 	if err != nil {
+		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "something went wrong!",
+		})
+		return
 
 	}
-	defer src.Close()
+	defer func() {
+		if err := src.Close(); err != nil {
+			log.Printf("file close error: %v", err)
+		}
+	}()
 
 	data, err := io.ReadAll(src)
+
+	if err != nil {
+		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "something went wrong!",
+		})
+		return
+	}
 
 	id := uuid.New()
 
@@ -47,14 +70,22 @@ func PUTObject(cxt *gin.Context) {
 
 	if err != nil {
 
+		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "something went wrong!",
+		})
+		return
 	}
 
 	// meta data store
 
-	err = dbx.InsertMetaData(id.String(), file.Filename, bucketId, "")
+	err = dbx.InsertMetaData(id.String(), file.Filename, bucketID, "")
 
 	if err != nil {
 
+		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "something went wrong!",
+		})
+		return
 	}
 
 	cxt.JSON(http.StatusCreated, gin.H{
@@ -63,9 +94,10 @@ func PUTObject(cxt *gin.Context) {
 
 }
 
+// GETObject is serve bytes to actual filename how user store it
 func GETObject(ctx *gin.Context) {
 
-	var objectId string
+	var objectID string
 
 	// id not email id
 
@@ -77,10 +109,41 @@ func GETObject(ctx *gin.Context) {
 		return
 	}
 
-	user, ok := val.(*iam.IamUser)
+	user, ok := val.(*iam.User)
 
 	if !ok {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
+		return
 
 	}
+
+	err := ctx.ShouldBindBodyWithJSON(objectID)
+
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
+		return
+	}
+
+	name, err := dbx.GetMyObject(objectID, user.ID)
+
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
+		return
+	}
+
+	obj := dataroute.NewObject(objectID, []byte{})
+
+	ObjectBytes, err := obj.GetObject()
+
+	if err != nil {
+
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
+		return
+	}
+
+	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name))
+	ctx.Header("Content-Type", "application/octet-stream")
+
+	ctx.File(string(ObjectBytes))
 
 }

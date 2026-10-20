@@ -1,3 +1,4 @@
+// Package cmd Entry point of application
 package cmd
 
 import (
@@ -6,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// RunServer is create http server
 func RunServer() {
 
 	server := gin.Default()
@@ -25,6 +27,11 @@ func RunServer() {
 
 	}
 
-	server.Run(":8080")
+	err := server.Run(":8080")
+
+	if err != nil {
+
+		return
+	}
 
 }

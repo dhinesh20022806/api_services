@@ -1,3 +1,4 @@
+// Package dataroute handling external services to store or get the object
 package dataroute
 
 import (
@@ -8,12 +9,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-
+// Object which stored in external services
 type Object struct {
-	Id string
+	ID   string
 	Data []byte
 }
-
 
 var conn *grpc.ClientConn
 var client genpb.ObjectServiceClient
@@ -30,13 +30,15 @@ func init() {
 	client = genpb.NewObjectServiceClient(conn)
 }
 
-func NewObject(id string, data []byte) *Object {
+// NewObject to access it's methods
+func NewObject(ID string, data []byte) *Object {
 	return &Object{
-		Id:id,
+		ID:   ID,
 		Data: data,
 	}
 }
 
+// PutObject communicate with external service to store the object
 func (o *Object) PutObject() error {
 
 	ctx := context.Background()
@@ -49,18 +51,19 @@ func (o *Object) PutObject() error {
 		return err
 	}
 
-	o.Id = res.ObjectId;
-	
+	o.ID = res.ObjectId
+
 	return nil
 }
 
+// GetObject communicate with external services to get the object
 func (o *Object) GetObject() ([]byte, error) {
 
 	ctx := context.Background()
 
 	res, err := client.GetObject(ctx, &genpb.GetObjectRequest{
-		ObjectId: o.Id,
-	});
+		ObjectId: o.ID,
+	})
 
 	if err != nil {
 		return nil, err
