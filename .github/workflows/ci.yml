@@ -21,6 +21,8 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
 
       - name: Format code
         run: make fmt
