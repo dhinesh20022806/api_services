@@ -5,16 +5,20 @@ import (
 	"errors"
 )
 
-
-
 var db *sql.DB
+
+type Bucket struct {
+	Id         string
+	BucketName string
+	OwnerId    string
+}
 
 func init() {
 
 	var err error
 
 	db, err = sql.Open("postgres", "")
-	
+
 	if err != nil {
 
 	}
@@ -38,16 +42,16 @@ func InsertMetaData(id, filename, bucketId, types string) error {
 	return nil
 }
 
-func IsMyBucketId(bucketId , owner_id string) (bool, error) {
+func IsMyBucketId(bucketId, owner_id string) (bool, error) {
 
 	var bucketName string
-	query := `SELECT bucketName FROM bucket WHERE bucketId = $1 AND owner_id = $2`;
+	query := `SELECT bucketName FROM bucket WHERE bucketId = $1 AND owner_id = $2`
 
 	err := db.QueryRow(query, bucketId, owner_id).Scan(
-         &bucketName,
+		&bucketName,
 	)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows){
+		if errors.Is(err, sql.ErrNoRows) {
 			return false, nil
 		}
 		return false, err
@@ -55,27 +59,23 @@ func IsMyBucketId(bucketId , owner_id string) (bool, error) {
 	return true, nil
 }
 
-func CreateBucket(bucketName, owner_id string) (interface{}, error) {
+func CreateBucket(bucketName, owner_id string) (*Bucket, error) {
 
-	var object struct{
-		Id string
-		bucketName string
-		OwnerId string
-	}
+	var object Bucket
 
 	query := `INSERT INTO bucket(bucket_name, owner_id) 
 	VALUES($1, $2)
 	RETURNING id, bucket_name, owner_id`
 
 	err := db.QueryRow(query, bucketName, owner_id).Scan(
-        &object.Id,
+		&object.Id,
 		&object.bucketName,
 		&object.OwnerId,
-	);
+	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return object, nil
+	return &object, nil
 }
