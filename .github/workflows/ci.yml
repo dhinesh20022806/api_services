@@ -21,17 +21,18 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
-
-      - name: Format code
-        run: make fmt
 
       - name: Run lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
           args: --timeout=5m
+
+      - name: Format code
+        run: make fmt
+
+      - name: Lint code
+        run: make lint
 
       - name: Run tests
         run: make test
