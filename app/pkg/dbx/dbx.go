@@ -4,7 +4,11 @@ package dbx
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
+
+	"github.com/dhinesh20022806/api_s3/app/pkg/env"
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -19,8 +23,8 @@ type Bucket struct {
 func init() {
 
 	var err error
-
-	db, err = sql.Open("postgres", "")
+	fmt.Printf("database url %s\n", env.Config.Database.URL)
+	db, err = sql.Open("postgres", env.Config.Database.URL)
 
 	if err != nil {
 
@@ -89,9 +93,9 @@ func CreateBucket(bucketName, ownerID string) (*Bucket, error) {
 
 	var object Bucket
 
-	query := `INSERT INTO bucket(bucket_name, owner_id) 
+	query := `INSERT INTO buckets(name, owner_id) 
 	VALUES($1, $2)
-	RETURNING id, bucket_name, owner_id`
+	RETURNING id, name, owner_id`
 
 	err := db.QueryRow(query, bucketName, ownerID).Scan(
 		&object.ID,

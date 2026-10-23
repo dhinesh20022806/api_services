@@ -2,6 +2,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -10,14 +11,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Request struct {
+	Name string `json:"name"`
+}
+
 // POSTBucket used to create new Bucket
 func POSTBucket(ctx *gin.Context) {
 
-	var name string
+	var req Request
 
-	err := ctx.ShouldBindBodyWithJSON(name)
+	err := ctx.ShouldBindBodyWithJSON(&req)
 
-	if err != nil || len(strings.Trim(name, " ")) > 0 {
+	fmt.Printf("erro  = %v", err)
+
+	if err != nil || len(strings.Trim(req.Name, " ")) == 0 {
 
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "Bad Request",
@@ -27,6 +34,7 @@ func POSTBucket(ctx *gin.Context) {
 
 	val, exists := ctx.Get("user")
 
+	fmt.Printf("\nerro node error = %v, val = %v\n", exists, val)
 	if !exists {
 
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -36,18 +44,20 @@ func POSTBucket(ctx *gin.Context) {
 		return
 	}
 
-	user, valid := val.(*iam.User)
+	user, valid := val.(iam.User)
 
 	if !valid {
+		fmt.Printf("\n erro node error = %v, user = %v \n", valid, user)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "Bad Request",
 		})
 		return
 	}
 
-	bucket, err := dbx.CreateBucket(name, user.ID)
+	bucket, err := dbx.CreateBucket(req.Name, user.ID)
 
 	if err != nil {
+		fmt.Printf("erro node error = %v\n", err)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "Bad Request",
 		})
