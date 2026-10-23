@@ -21,7 +21,7 @@ var client genpb.ObjectServiceClient
 func init() {
 	var err error
 
-	conn, err = grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err = grpc.NewClient("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 		panic(err)
@@ -44,7 +44,8 @@ func (o *Object) PutObject() error {
 	ctx := context.Background()
 
 	res, err := client.StoreObject(ctx, &genpb.StoreObjectRequest{
-		Data: o.Data,
+		Data:     o.Data,
+		ObjectId: o.ID,
 	})
 
 	if err != nil {

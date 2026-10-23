@@ -14,14 +14,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// RequestObject struct request body json data
+type RequestObject struct {
+	BucketID string `form:"bucketid"`
+}
+
 // PUTObject is store raw bytes to external services
 func PUTObject(cxt *gin.Context) {
 
-	var bucketID string
+	var req RequestObject
 
-	err := cxt.ShouldBindBodyWithJSON(bucketID)
+	err := cxt.ShouldBind(&req)
 
-	if err != nil || len(bucketID) != 0 {
+	fmt.Printf("bucket id = %v", err)
+
+	if err != nil {
 		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "bad request",
 		})
@@ -34,6 +41,7 @@ func PUTObject(cxt *gin.Context) {
 
 		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
+			"err":     err.Error(),
 		})
 		return
 	}
@@ -43,6 +51,7 @@ func PUTObject(cxt *gin.Context) {
 	if err != nil {
 		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
+			"err":     err.Error(),
 		})
 		return
 
@@ -58,6 +67,7 @@ func PUTObject(cxt *gin.Context) {
 	if err != nil {
 		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
+			"err":     err.Error(),
 		})
 		return
 	}
@@ -72,13 +82,14 @@ func PUTObject(cxt *gin.Context) {
 
 		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
+			"err":     err.Error(),
 		})
 		return
 	}
 
 	// meta data store
 
-	err = dbx.InsertMetaData(id.String(), file.Filename, bucketID, "")
+	err = dbx.InsertMetaData(id.String(), file.Filename, req.BucketID, "")
 
 	if err != nil {
 
