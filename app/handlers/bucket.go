@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Request is Bucket request body struct
 type Request struct {
 	Name string `json:"name"`
 }

@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/dhinesh20022806/api_s3/app/pkg/env"
+	// import pq packages
 	_ "github.com/lib/pq"
 )
 
