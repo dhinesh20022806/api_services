@@ -2,6 +2,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -15,6 +16,7 @@ func Authenticate(ctx *gin.Context) {
 
 	token := ctx.Request.Header.Get("Authorization")
 
+	fmt.Printf("token=%s\n", token)
 	if token == "" {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -26,7 +28,9 @@ func Authenticate(ctx *gin.Context) {
 
 	validUser, err := user.IsValidJwt()
 
+	fmt.Printf("error = %v, validUser = %v", err, validUser)
 	if err != nil {
+
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "token invalid or expired",
 		})

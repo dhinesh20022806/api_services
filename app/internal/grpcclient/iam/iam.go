@@ -3,6 +3,7 @@ package iam
 
 import (
 	"context"
+	"fmt"
 
 	genpb "github.com/dhinesh20022806/grpc_service/proto/gen"
 	"google.golang.org/grpc"
@@ -83,6 +84,7 @@ func (i *User) IsValidJwt() (User, error) {
 		Jwt: i.jwt,
 	})
 
+	fmt.Printf("user = %v and err = %v", user, err)
 	if err != nil {
 
 		return User{}, err

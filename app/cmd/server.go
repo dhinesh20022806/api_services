@@ -22,6 +22,7 @@ func RunServer() {
 	auth.Use(middlewares.Authenticate)
 
 	{
+		auth.POST("/bucket", handlers.POSTBucket)
 		auth.PUT("/", handlers.PUTObject)
 		auth.GET("/", handlers.GETObject)
 
