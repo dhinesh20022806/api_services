@@ -89,12 +89,17 @@ func PUTObject(cxt *gin.Context) {
 
 	// meta data store
 
-	err = dbx.InsertMetaData(id.String(), file.Filename, req.BucketID, "")
+	val, _ := cxt.Get("user")
+
+	user := val.(iam.User)
+
+	err = dbx.InsertMetaData(id.String(), file.Filename, req.BucketID, user.ID)
 
 	if err != nil {
 
 		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
+			"err":     err.Error(),
 		})
 		return
 	}

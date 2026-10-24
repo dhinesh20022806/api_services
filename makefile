@@ -6,6 +6,9 @@ lint:
 fmt:
 	golangci-lint fmt
 
+run:
+	godotenv -f .env go run main.go
+
 test:
 	go test ./...
 

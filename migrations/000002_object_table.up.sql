@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS objects (
-    id SERIAL PRIMARY KEY,
+    id TEXT UNIQUE PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     bucket_name VARCHAR(255) NOT NULL,
     owner_id TEXT NOT NULL,
