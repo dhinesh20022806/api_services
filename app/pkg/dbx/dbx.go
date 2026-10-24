@@ -40,14 +40,14 @@ func init() {
 }
 
 // InsertMetaData store the meta of object in database
-func InsertMetaData(id, filename, bucketID, owner_id string) error {
+func InsertMetaData(id, filename, bucketID, ownerID string) error {
 
 	var name string
 
 	selectQuery := `SELECT name FROM buckets WHERE id = $1 AND owner_id = $2;`
 
-	slog.Info("select query", "bucketId", bucketID, "owner id", owner_id)
-	err := db.QueryRow(selectQuery, bucketID, owner_id).Scan(&name)
+	slog.Info("select query", "bucketId", bucketID, "owner id", ownerID)
+	err := db.QueryRow(selectQuery, bucketID, ownerID).Scan(&name)
 
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func InsertMetaData(id, filename, bucketID, owner_id string) error {
 	query := `INSERT INTO objects (id, name, bucket_name, owner_id) VALUES
 	 ($1, $2, $3, $4)`
 
-	_, err = db.Exec(query, id, filename, name, owner_id)
+	_, err = db.Exec(query, id, filename, name, ownerID)
 
 	if err != nil {
 		return err
