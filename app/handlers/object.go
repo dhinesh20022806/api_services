@@ -14,32 +14,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RequestObject struct request body json data
-type RequestObject struct {
-	BucketID string `form:"bucketid"`
-}
-
 // PUTObject is store raw bytes to external services
-func PUTObject(cxt *gin.Context) {
+func PUTObject(ctx *gin.Context) {
 
-	var req RequestObject
+	bucketName := ctx.Param("bucketName")
+	fileName := ctx.Param("fileName")
 
-	err := cxt.ShouldBind(&req)
-
-	fmt.Printf("bucket id = %v", err)
-
-	if err != nil {
-		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"Message": "bad request",
-		})
-		return
-	}
-
-	file, err := cxt.FormFile("file")
+	file, err := ctx.FormFile("file")
 
 	if err != nil {
 
-		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
 			"err":     err.Error(),
 		})
@@ -49,7 +34,7 @@ func PUTObject(cxt *gin.Context) {
 	src, err := file.Open()
 
 	if err != nil {
-		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
 			"err":     err.Error(),
 		})
@@ -65,7 +50,7 @@ func PUTObject(cxt *gin.Context) {
 	data, err := io.ReadAll(src)
 
 	if err != nil {
-		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
 			"err":     err.Error(),
 		})
@@ -80,7 +65,7 @@ func PUTObject(cxt *gin.Context) {
 
 	if err != nil {
 
-		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
 			"err":     err.Error(),
 		})
@@ -89,22 +74,22 @@ func PUTObject(cxt *gin.Context) {
 
 	// meta data store
 
-	val, _ := cxt.Get("user")
+	val, _ := ctx.Get("user")
 
 	user := val.(iam.User)
 
-	err = dbx.InsertMetaData(id.String(), file.Filename, req.BucketID, user.ID)
+	err = dbx.InsertMetaData(id.String(), fileName, bucketName, user.ID)
 
 	if err != nil {
 
-		cxt.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "something went wrong!",
 			"err":     err.Error(),
 		})
 		return
 	}
 
-	cxt.JSON(http.StatusCreated, gin.H{
+	ctx.JSON(http.StatusCreated, gin.H{
 		"Message": "successfully created",
 	})
 
@@ -113,9 +98,8 @@ func PUTObject(cxt *gin.Context) {
 // GETObject is serve bytes to actual filename how user store it
 func GETObject(ctx *gin.Context) {
 
-	var objectID string
-
-	// id not email id
+	bucketName := ctx.Param("bucketName")
+	fileName := ctx.Param("fileName")
 
 	val, exists := ctx.Get("user")
 
@@ -125,7 +109,7 @@ func GETObject(ctx *gin.Context) {
 		return
 	}
 
-	user, ok := val.(*iam.User)
+	user, ok := val.(iam.User)
 
 	if !ok {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
@@ -133,33 +117,26 @@ func GETObject(ctx *gin.Context) {
 
 	}
 
-	err := ctx.ShouldBindBodyWithJSON(objectID)
+	ObjectID, err := dbx.GetMyObject(fileName, bucketName, user.ID)
 
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
+	if err != nil || ObjectID == "" {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!", "msg": err.Error()})
 		return
 	}
 
-	name, err := dbx.GetMyObject(objectID, user.ID)
-
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
-		return
-	}
-
-	obj := dataroute.NewObject(objectID, []byte{})
+	obj := dataroute.NewObject(ObjectID, []byte{})
 
 	ObjectBytes, err := obj.GetObject()
 
 	if err != nil {
 
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!", "err": err.Error()})
 		return
 	}
 
-	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name))
+	ctx.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 	ctx.Header("Content-Type", "application/octet-stream")
 
-	ctx.File(string(ObjectBytes))
+	ctx.Data(http.StatusOK, "application/octet-stream", ObjectBytes)
 
 }

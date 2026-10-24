@@ -27,3 +27,9 @@ get the version
 ```bash
 migrate -path migrations -database "$DATABASE_URL" version
 ```
+
+```bash
+
+curl -X GET  "http://localhost:8080/my-bucket/01_Verb_Tenses+(1).pdf"  -H "Authorization: Bearer $JWT_TOKEN"  -o sample.pdf
+
+```

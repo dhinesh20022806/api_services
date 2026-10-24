@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"log/slog"
 
 	"github.com/dhinesh20022806/api_s3/app/pkg/env"
 	// import pq packages
@@ -40,23 +39,12 @@ func init() {
 }
 
 // InsertMetaData store the meta of object in database
-func InsertMetaData(id, filename, bucketID, owner_id string) error {
-
-	var name string
-
-	selectQuery := `SELECT name FROM buckets WHERE id = $1 AND owner_id = $2;`
-
-	slog.Info("select query", "bucketId", bucketID, "owner id", owner_id)
-	err := db.QueryRow(selectQuery, bucketID, owner_id).Scan(&name)
-
-	if err != nil {
-		return err
-	}
+func InsertMetaData(id, filename, bucketName, ownerID string) error {
 
 	query := `INSERT INTO objects (id, name, bucket_name, owner_id) VALUES
 	 ($1, $2, $3, $4)`
 
-	_, err = db.Exec(query, id, filename, name, owner_id)
+	_, err := db.Exec(query, id, filename, bucketName, ownerID)
 
 	if err != nil {
 		return err
@@ -84,21 +72,21 @@ func IsMyBucketID(bucketID, ownerID string) (bool, error) {
 }
 
 // GetMyObject allow authorised people access their objects
-func GetMyObject(objectID string, ownerID string) (string, error) {
+func GetMyObject(objectName, bucketName, ownerID string) (string, error) {
 
-	var objectName string
-	query := `SELECT name FROM objects WHERE id = $1 AND owner_id = $2;`
+	var objectID string
+	query := `SELECT id FROM objects WHERE name = $1 AND bucket_name = $2 AND owner_id = $3;`
 
-	err := db.QueryRow(query, objectID, ownerID).Scan(
-		&objectName,
+	err := db.QueryRow(query, objectName, bucketName, ownerID).Scan(
+		&objectID,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", nil
 		}
-		return objectName, err
+		return objectID, err
 	}
-	return objectName, nil
+	return objectID, nil
 }
 
 // CreateBucket used to create new unique bucketName there is sql constraint for creating name

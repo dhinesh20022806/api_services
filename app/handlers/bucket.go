@@ -29,6 +29,7 @@ func POSTBucket(ctx *gin.Context) {
 
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "Bad Request",
+			"err":     err,
 		})
 		return
 	}
@@ -40,6 +41,7 @@ func POSTBucket(ctx *gin.Context) {
 
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "Bad Request",
+			"err":     err,
 		})
 
 		return
@@ -51,6 +53,7 @@ func POSTBucket(ctx *gin.Context) {
 		fmt.Printf("\n erro node error = %v, user = %v \n", valid, user)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "Bad Request",
+			"err":     err,
 		})
 		return
 	}
@@ -61,6 +64,7 @@ func POSTBucket(ctx *gin.Context) {
 		fmt.Printf("erro node error = %v\n", err)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"Message": "Bad Request",
+			"err":     err,
 		})
 		return
 	}
