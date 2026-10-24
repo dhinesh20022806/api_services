@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"log/slog"
 
 	"github.com/dhinesh20022806/api_s3/app/pkg/env"
 	// import pq packages
@@ -40,23 +39,12 @@ func init() {
 }
 
 // InsertMetaData store the meta of object in database
-func InsertMetaData(id, filename, bucketID, ownerID string) error {
-
-	var name string
-
-	selectQuery := `SELECT name FROM buckets WHERE id = $1 AND owner_id = $2;`
-
-	slog.Info("select query", "bucketId", bucketID, "owner id", ownerID)
-	err := db.QueryRow(selectQuery, bucketID, ownerID).Scan(&name)
-
-	if err != nil {
-		return err
-	}
+func InsertMetaData(id, filename, bucketName, ownerID string) error {
 
 	query := `INSERT INTO objects (id, name, bucket_name, owner_id) VALUES
 	 ($1, $2, $3, $4)`
 
-	_, err = db.Exec(query, id, filename, name, ownerID)
+	_, err := db.Exec(query, id, filename, bucketName, ownerID)
 
 	if err != nil {
 		return err

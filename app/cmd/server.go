@@ -23,7 +23,7 @@ func RunServer() {
 
 	{
 		auth.POST("/bucket", handlers.POSTBucket)
-		auth.PUT("/", handlers.PUTObject)
+		auth.PUT("/:bucketName/:fileName", handlers.PUTObject)
 		auth.GET("/:bucketName/:fileName", handlers.GETObject)
 
 	}
