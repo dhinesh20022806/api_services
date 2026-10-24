@@ -84,21 +84,21 @@ func IsMyBucketID(bucketID, ownerID string) (bool, error) {
 }
 
 // GetMyObject allow authorised people access their objects
-func GetMyObject(objectID string, ownerID string) (string, error) {
+func GetMyObject(objectName, bucketName, ownerID string) (string, error) {
 
-	var objectName string
-	query := `SELECT name FROM objects WHERE id = $1 AND owner_id = $2;`
+	var objectID string
+	query := `SELECT id FROM objects WHERE name = $1 AND bucket_name = $2 AND owner_id = $3;`
 
-	err := db.QueryRow(query, objectID, ownerID).Scan(
-		&objectName,
+	err := db.QueryRow(query, objectName, bucketName, ownerID).Scan(
+		&objectID,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", nil
 		}
-		return objectName, err
+		return objectID, err
 	}
-	return objectName, nil
+	return objectID, nil
 }
 
 // CreateBucket used to create new unique bucketName there is sql constraint for creating name

@@ -113,9 +113,10 @@ func PUTObject(cxt *gin.Context) {
 // GETObject is serve bytes to actual filename how user store it
 func GETObject(ctx *gin.Context) {
 
-	var objectID string
-
 	// id not email id
+
+	bucketName := ctx.Param("bucketName")
+	fileName := ctx.Param("fileName")
 
 	val, exists := ctx.Get("user")
 
@@ -125,7 +126,7 @@ func GETObject(ctx *gin.Context) {
 		return
 	}
 
-	user, ok := val.(*iam.User)
+	user, ok := val.(iam.User)
 
 	if !ok {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
@@ -133,33 +134,26 @@ func GETObject(ctx *gin.Context) {
 
 	}
 
-	err := ctx.ShouldBindBodyWithJSON(objectID)
+	ObjectID, err := dbx.GetMyObject(fileName, bucketName, user.ID)
 
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
+	if err != nil || ObjectID == "" {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!", "msg": err.Error()})
 		return
 	}
 
-	name, err := dbx.GetMyObject(objectID, user.ID)
-
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
-		return
-	}
-
-	obj := dataroute.NewObject(objectID, []byte{})
+	obj := dataroute.NewObject(ObjectID, []byte{})
 
 	ObjectBytes, err := obj.GetObject()
 
 	if err != nil {
 
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!"})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user not found!", "err": err.Error()})
 		return
 	}
 
-	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name))
+	ctx.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 	ctx.Header("Content-Type", "application/octet-stream")
 
-	ctx.File(string(ObjectBytes))
+	ctx.Data(http.StatusOK, "application/octet-stream", ObjectBytes)
 
 }
