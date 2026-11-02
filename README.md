@@ -24,3 +24,16 @@ curl -X GET http://localhost:8080/my-new-bucket/HelloWorld.mp4 \
 
   echo
 ```
+
+```bash
+export JWT_TOKEN=$(curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "dhinesh20022806@gmail.com", "password": "password12345"}' \
+  -c - | grep -i 'token' | awk '{print $NF}')
+
+```
+
+```bash
+curl -X GET http://localhost:8080/bucket \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```

@@ -110,3 +110,46 @@ func CreateBucket(bucketName, ownerID string) (*Bucket, error) {
 
 	return &object, nil
 }
+
+// ListBuckets query all the buckets owned by user
+func ListBuckets(ownedID string) ([]string, error) {
+
+	var buckets []string
+
+	query := `SELECT name FROM buckets WHERE owner_id=$1`
+
+	rows, err := db.Query(query, ownedID)
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	defer func() {
+		closeErr := rows.Close()
+
+		if err != nil {
+			if closeErr != nil {
+				log.Printf("failed to close row error %v", err)
+			}
+			return
+		}
+		err = closeErr
+	}()
+
+	for rows.Next() {
+
+		var bucket string
+
+		if err := rows.Scan(&bucket); err != nil {
+			return []string{}, err
+		}
+
+		buckets = append(buckets, bucket)
+	}
+
+	if err = rows.Err(); err != nil {
+		return []string{}, err
+	}
+
+	return buckets, nil
+}
