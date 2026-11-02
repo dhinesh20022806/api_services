@@ -78,3 +78,39 @@ func POSTBucket(ctx *gin.Context) {
 	})
 
 }
+
+func GETBuckets(ctx *gin.Context) {
+
+	val, exists := ctx.Get("user")
+
+	if !exists {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error": "Unauthorized",
+		})
+		return
+	}
+
+	user, valid := val.(iam.User)
+
+	if !valid {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "Internal server error",
+		})
+		return
+	}
+
+	buckets, err := dbx.ListBuckets(user.ID)
+
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"buckets": buckets,
+		},
+	})
+}
