@@ -111,6 +111,7 @@ func CreateBucket(bucketName, ownerID string) (*Bucket, error) {
 	return &object, nil
 }
 
+// ListBuckets query all the buckets owned by user
 func ListBuckets(ownedID string) ([]string, error) {
 
 	var buckets []string

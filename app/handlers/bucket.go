@@ -79,6 +79,7 @@ func POSTBucket(ctx *gin.Context) {
 
 }
 
+// GETBuckets list all bucket name without pagination for now
 func GETBuckets(ctx *gin.Context) {
 
 	val, exists := ctx.Get("user")
