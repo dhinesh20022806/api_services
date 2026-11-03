@@ -37,3 +37,8 @@ export JWT_TOKEN=$(curl -X POST http://localhost:8080/login \
 curl -X GET http://localhost:8080/bucket \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
+
+```bash
+curl -X GET http://localhost:8080/objects?bucketPath= \
+ -H "Authorization: Bearer $JWT_TOKEN"
+```
