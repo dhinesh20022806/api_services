@@ -153,3 +153,46 @@ func ListBuckets(ownedID string) ([]string, error) {
 
 	return buckets, nil
 }
+
+// ListObjects return list of object in pariticular buckets
+func ListObjects(bucketName, like, ownerID string) ([]string, error) {
+
+	var objects []string
+
+	query := `SELECT name FROM objects WHERE bucket_name = $1 AND owner_id = $2 AND name LIKE $3`
+
+	row, err := db.Query(query, bucketName, ownerID, "%"+like)
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	defer func() {
+		closeRow := row.Close()
+
+		if err != nil {
+			if closeRow != nil {
+				log.Printf("failed to close Row error %v", err)
+			}
+			return
+		}
+
+		err = closeRow
+	}()
+
+	for row.Next() {
+		var objectName string
+
+		if err = row.Scan(&objectName); err != nil {
+			return []string{}, err
+		}
+
+		objects = append(objects, objectName)
+	}
+
+	if err = row.Err(); err != nil {
+		return []string{}, err
+	}
+
+	return objects, nil
+}

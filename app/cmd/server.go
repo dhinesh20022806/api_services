@@ -27,6 +27,7 @@ func RunServer() {
 		auth.PUT("/:bucketName/:fileName", handlers.PUTObject)
 		auth.GET("/:bucketName/:fileName", handlers.GETObject)
 
+		auth.GET("/list/:bucketName/*objects", handlers.ListObject)
 	}
 
 	err := server.Run(":8080")
